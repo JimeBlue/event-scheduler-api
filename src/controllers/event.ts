@@ -21,7 +21,7 @@ export const getAllEvents = async (req: Request, res: Response) => {
     }
 };
 
-// TODO: get one event --> GET /events/:id
+// Get one event --> GET /events/:id
 // - success response must be the RAW event object, not wrapped in { msg, event } becasue EventDetails.jsx reads event.title/event.date/etc. directly off the response.
 // - not-found case: use `message` as the key (not `msg`), since api.js only reads data.error/data.message for its error text — a `msg` key would
 //   silently never reach the user.
@@ -40,10 +40,27 @@ export const getOneEvent = async (req: Request, res: Response) => {
     }
 }
 
-// TODO: create an event
+// Create an event
 // - POST /events, body validated with eventSchema.safeParse(req.body)
 // - response shape is free to choose — CreateEventForm ignores the return
 //   value entirely, so { msg, event } or the raw event both work fine.
+
+
+export const createEvent = async (req: Request, res: Response) => {
+    try {
+         // TS: validate req.body before trusting it, since req.body has no guaranteed shape at runtime
+        const result = eventSchema.safeParse(req.body);
+
+        if (!result.success) {
+            return res.status(400).json({message: "Invalid event data", errors: result.error.issues});
+        }
+    const { title, description, date, location, latitude, longitude } = result.data;
+    const event = await Event.create ({title, description, date, location, latitude, longitude});
+    res.status(201).json({message: "event created successfully", event})
+    } catch (error) {
+        res.status(500).json(error);
+    }
+}
 
 // TODO: update an event
 // - PUT /events/:id, body validated with eventSchema.safeParse(req.body)
