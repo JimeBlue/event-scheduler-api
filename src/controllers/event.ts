@@ -21,13 +21,24 @@ export const getAllEvents = async (req: Request, res: Response) => {
     }
 };
 
-// TODO: get one event
-// - GET /events/:id
-// - success response must be the RAW event object, not wrapped in { msg, event }
-//   — EventDetails.jsx reads event.title/event.date/etc. directly off the response.
-// - not-found case: use `message` as the key (not `msg`), since api.js only
-//   reads data.error/data.message for its error text — a `msg` key would
+// TODO: get one event --> GET /events/:id
+// - success response must be the RAW event object, not wrapped in { msg, event } becasue EventDetails.jsx reads event.title/event.date/etc. directly off the response.
+// - not-found case: use `message` as the key (not `msg`), since api.js only reads data.error/data.message for its error text — a `msg` key would
 //   silently never reach the user.
+
+export const getOneEvent = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const event = await Event.findById(id);
+
+        if (event) {
+            return res.status(200).json(event);
+        }
+        res.status(404).json({message: "I could not find that event :("})
+    } catch (error) {
+        res.status(500).json(error);
+    }
+}
 
 // TODO: create an event
 // - POST /events, body validated with eventSchema.safeParse(req.body)
