@@ -43,9 +43,15 @@ const EventSchema = new mongoose.Schema<IEvent>({
   longitude: {
     type: Number,
     required: false,
-    min: [-90, "latitude must be between -90 and 90"],
-    max: [90, "latitude must be between -90 and 90"],
+    min: [-180, "longitude must be between -180 and 180"],
+    max: [180, "longitude must be between -180 and 180"],
   },
 });
+
+// Mongoose's primary key is `_id`, and its
+// automatic `id` virtual (a string mirror of `_id`) is excluded from JSON
+// output by default — turning it on here means the frontend's `event.id`
+// keeps working with zero frontend changes.
+EventSchema.set("toJSON", { virtuals: true });
 
 export default mongoose.model<IEvent>("Event", EventSchema);
