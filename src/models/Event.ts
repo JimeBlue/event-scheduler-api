@@ -43,8 +43,8 @@ const EventSchema = new mongoose.Schema<IEvent>({
   longitude: {
     type: Number,
     required: false,
-    min: -180,
-    max: 180
+    min: [-90, "latitude must be between -90 and 90"],
+    max: [90, "latitude must be between -90 and 90"],
   },
 });
 
