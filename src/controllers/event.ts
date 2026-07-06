@@ -115,10 +115,19 @@ export const deleteEvent = async (req: Request, res: Response) => {
     }
 };
 
-// TODO: get upcoming events
-// - GET /events/upcoming — must be registered BEFORE /:id in the router, or
-//   Express/Mongoose will try to cast "upcoming" as an ObjectId and crash.
-// - response must be a BARE array, not wrapped at all — fetchUpcoming calls
-//   data.slice(0, 3) directly on the response, so { msg, results } would break
-//   immediately (no message possible here, even additive).
-// - query: date >= now, sorted ascending.
+// Get upcoming events --> GET /events/upcoming
+// - response is a BARE array, no { msg }/{ results } wrapper — fetchUpcoming
+//   calls data.slice(0, 3) directly on the response.
+// - must be registered BEFORE /:id in the router.
+
+export const getUpcomingEvents = async (req: Request, res: Response) => {
+    try {
+        // $gte: new Date()  Mongoose/MongoDB filter meaning "only documents where date is greater than or equal to right now."
+        //  $gte is Mongo's query operator for "greater than or equal."
+        // .sort({ date: 1 }) — sorts ascending by date (soonest first); 1 means ascending, -1 would mean descending.
+        const events = await Event.find({ date: { $gte: new Date() } }).sort({ date: 1 });
+        res.status(200).json(events);
+    } catch (error) {
+        res.status(500).json(error);
+    }
+};
