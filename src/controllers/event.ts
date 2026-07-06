@@ -62,16 +62,58 @@ export const createEvent = async (req: Request, res: Response) => {
     }
 }
 
-// TODO: update an event
-// - PUT /events/:id, body validated with eventSchema.safeParse(req.body)
-// - not called by the frontend yet (no edit UI exists) — decide the response
-//   shape (msg vs raw event vs both) once the edit feature is actually built,
-//   so it matches whatever that feature ends up expecting.
+// Update an event --> PUT /events/:id
+// - success: { message, event } 
+// - not found: { message } (404) 
 
-// TODO: delete an event
-// - DELETE /events/:id
-// - not called by the frontend yet (no delete UI exists) — same as update,
-//   decide the shape (msg vs 204 no body) once that feature exists.
+export const updateEvent = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        // TS: validate req.body before trusting it, since req.body has no guaranteed shape at runtime
+        const result = eventSchema.safeParse(req.body);
+
+        if (!result.success) {
+            return res.status(400).json({ message: "Invalid event data", errors: result.error.issues });
+        }
+
+        const { title, description, date, location, latitude, longitude } = result.data;
+
+        const event = await Event.findByIdAndUpdate(
+            id,
+            { title, description, date, location, latitude, longitude },
+            { returnDocument: "after" },
+        );
+
+        if (!event) {
+            return res.status(404).json({ message: "I could not find that event :(" });
+        }
+
+        res.status(200).json({ message: "Event updated successfully", event });
+    } catch (error) {
+        res.status(500).json(error);
+    }
+};
+
+// Delete an event --> DELETE /events/:id
+// - success: { message, event } — same shape as createEvent/updateEvent
+// - not found: { message } (404)
+
+export const deleteEvent = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        const event = await Event.findByIdAndDelete(id);
+
+        if (!event) {
+            return res.status(404).json({ message: "I could not find that event :(" });
+        }
+
+        res.status(200).json({ message: "Event deleted successfully", event });
+    } catch (error) {
+        res.status(500).json(error);
+    }
+};
 
 // TODO: get upcoming events
 // - GET /events/upcoming — must be registered BEFORE /:id in the router, or
