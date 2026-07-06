@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import connectDB from "./dbinit.ts";
+import event from "#routes/event";
 
 // Initialize the Express application instance
 const app = express();
@@ -19,9 +20,8 @@ app.get("/", (req, res) => {
   res.send("hello world");
 });
 
-// mount your resource routers here, e.g.:
-// import events from "#routes/events";
-// app.use("/api/v1/events", events);
+// mount the event resource routers
+app.use("/api/v1/events", event);
 
 // listen expects a port, which was declared at top, and a callback function
 app.listen(port, () => {
