@@ -21,3 +21,6 @@ api.route("/upcoming").get(getUpcomingEvents);
 //   PUT    → run updateEvent  (change that event's details)
 //   DELETE → run deleteEvent  (remove that event)
 api.route("/:id").get(getOneEvent).put(updateEvent).delete(deleteEvent);
+
+// Export this router so the main app file can plug these routes in
+export default api;
